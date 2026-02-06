@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Socket Chat - Local WebSocket Communication
 
-## Getting Started
+A simple Next.js + shadcn/ui chat application that allows 2 PCs to communicate using local WebSocket (Socket.io).
 
-First, run the development server:
+**No external services needed!** Everything runs on your local network.
+
+## 🚀 Quick Start
 
 ```bash
+# Install dependencies
+npm install
+
+# Run the app
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📱 How to Test (2 PCs Communicating)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Option 1: Same PC, Different Browsers
+1. Open `http://localhost:3000` in Chrome → Enter username "Alice"
+2. Open `http://localhost:3000` in Firefox → Enter username "Bob"
+3. Start chatting! Messages appear in real-time on both browsers
 
-## Learn More
+### Option 2: Two Different PCs on Same Network
+1. Run `npm run dev` on PC 1
+2. Note the network URL shown in terminal (e.g., `http://192.168.x.x:3000`)
+3. On PC 2, open that network URL in browser
+4. Both PCs can now chat through the WebSocket!
 
-To learn more about Next.js, take a look at the following resources:
+## 🏗️ Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Next.js** - React framework
+- **Socket.io** - Local WebSocket communication
+- **shadcn/ui** - UI components
+- **Tailwind CSS** - Styling
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📁 Project Structure
 
-## Deploy on Vercel
+```
+src/
+├── app/
+│   ├── page.tsx       # Main page
+│   ├── layout.tsx     # Root layout
+│   └── globals.css    # Global styles
+├── components/
+│   ├── ChatRoom.tsx   # Main chat component
+│   └── ui/            # shadcn components
+└── lib/
+    └── utils.ts       # Utility functions
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+server.js              # Custom server with WebSocket
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📝 How It Works
+
+1. **Custom Server**: `server.js` runs Next.js with Socket.io on the same port
+2. **User connects**: Opens browser, enters username, joins chat
+3. **WebSocket connection**: Client connects to server via Socket.io
+4. **Send message**: Client emits message event to server
+5. **Broadcast**: Server broadcasts to ALL connected clients
+6. **Receive**: All clients receive the message instantly
+
+## ⚠️ Vercel Deployment Note
+
+This app uses a custom WebSocket server and **cannot be deployed to Vercel** (serverless doesn't support WebSockets). 
+
+For deployment, use platforms that support persistent connections:
+- **Railway**
+- **Render**
+- **DigitalOcean App Platform**
+- **Your own VPS**
