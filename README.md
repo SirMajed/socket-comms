@@ -1,73 +1,92 @@
-# Socket Chat - Local WebSocket Communication
+# Socket Chat — Client + Server Architecture
 
-A simple Next.js + shadcn/ui chat application that allows 2 PCs to communicate using local WebSocket (Socket.io).
+Two Docker containers for real-time WebSocket chat between 2 PCs.
 
-**No external services needed!** Everything runs on your local network.
+```
+┌─────────────────┐         ┌─────────────────┐
+│  socket-client  │◄──────►│  socket-server  │
+│  (Next.js UI)   │  WS     │  (Socket.io)    │
+│  Port 3000      │         │  Port 4000      │
+└─────────────────┘         └─────────────────┘
+```
 
-## 🚀 Quick Start
+## 📁 Structure
 
+```
+socket/
+├── server/              ← Docker #1: Socket Server
+│   ├── server.js        ← The whole server (one file)
+│   ├── package.json
+│   └── Dockerfile
+├── src/                 ← Docker #2: Client UI
+│   └── components/
+│       └── ChatRoom.tsx
+├── Dockerfile
+└── docker-compose.yml
+```
+
+## 🚀 Quick Start (Local Dev)
+
+**Terminal 1 — Start the socket server:**
 ```bash
-# Install dependencies
+cd server
 npm install
+node server.js
+# Server running on port 4000
+```
 
-# Run the app
+**Terminal 2 — Start the client:**
+```bash
+npm install
 npm run dev
+# Client running on port 3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open `http://localhost:3000` in two browsers and chat!
 
-## 📱 How to Test (2 PCs Communicating)
+---
 
-### Option 1: Same PC, Different Browsers
-1. Open `http://localhost:3000` in Chrome → Enter username "Alice"
-2. Open `http://localhost:3000` in Firefox → Enter username "Bob"
-3. Start chatting! Messages appear in real-time on both browsers
+## 🐳 Docker Build (for Unraid)
 
-### Option 2: Two Different PCs on Same Network
-1. Run `npm run dev` on PC 1
-2. Note the network URL shown in terminal (e.g., `http://192.168.x.x:3000`)
-3. On PC 2, open that network URL in browser
-4. Both PCs can now chat through the WebSocket!
+### Build both images:
+```bash
+# Build the socket server image
+docker build -t socket-server:latest ./server
 
-## 🏗️ Tech Stack
-
-- **Next.js** - React framework
-- **Socket.io** - Local WebSocket communication
-- **shadcn/ui** - UI components
-- **Tailwind CSS** - Styling
-
-## 📁 Project Structure
-
+# Build the client image (set YOUR_UNRAID_IP)
+docker build -t socket-client:latest \
+  --build-arg NEXT_PUBLIC_SOCKET_URL=http://YOUR_UNRAID_IP:4000 .
 ```
-src/
-├── app/
-│   ├── page.tsx       # Main page
-│   ├── layout.tsx     # Root layout
-│   └── globals.css    # Global styles
-├── components/
-│   ├── ChatRoom.tsx   # Main chat component
-│   └── ui/            # shadcn components
-└── lib/
-    └── utils.ts       # Utility functions
 
-server.js              # Custom server with WebSocket
+### Export as .tar for Unraid:
+```bash
+docker save -o socket-server.tar socket-server:latest
+docker save -o socket-client.tar socket-client:latest
 ```
+
+### Or use docker-compose:
+Edit `docker-compose.yml` and change `NEXT_PUBLIC_SOCKET_URL` to your Unraid IP, then:
+```bash
+docker-compose up -d
+```
+
+---
+
+## ⚙️ Unraid Setup
+
+1. Copy both `.tar` files to your Unraid
+2. Load them:
+   ```bash
+   docker load -i socket-server.tar
+   docker load -i socket-client.tar
+   ```
+3. Create two Docker containers in Unraid:
+   - **socket-server**: Port `4000:4000`
+   - **socket-client**: Port `3000:3000`, build with `NEXT_PUBLIC_SOCKET_URL=http://YOUR_UNRAID_IP:4000`
 
 ## 📝 How It Works
 
-1. **Custom Server**: `server.js` runs Next.js with Socket.io on the same port
-2. **User connects**: Opens browser, enters username, joins chat
-3. **WebSocket connection**: Client connects to server via Socket.io
-4. **Send message**: Client emits message event to server
-5. **Broadcast**: Server broadcasts to ALL connected clients
-6. **Receive**: All clients receive the message instantly
-
-## ⚠️ Vercel Deployment Note
-
-This app uses a custom WebSocket server and **cannot be deployed to Vercel** (serverless doesn't support WebSockets). 
-
-For deployment, use platforms that support persistent connections:
-- **Railway**
-- **Render**
-- **DigitalOcean App Platform**
-- **Your own VPS**
+1. **socket-server** runs Socket.io on port 4000 (plain Node.js, one file)
+2. **socket-client** is the Next.js UI on port 3000
+3. When a user opens the client, it connects to the socket server via WebSocket
+4. Messages are broadcast to all connected clients in real-time

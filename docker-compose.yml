@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # ─── Socket Server (plain Node.js + Socket.io) ───
+  socket-server:
+    image: socket-server:latest
+    container_name: socket-server
+    build:
+      context: ./server
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ─── Client UI (Next.js app) ─────────────────────
+  socket-client:
+    image: socket-app:latest
+    container_name: socket-client
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_SOCKET_URL: http://192.168.100.69:8080
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - socket-server
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
