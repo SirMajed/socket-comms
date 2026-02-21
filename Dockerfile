@@ -1,6 +1,4 @@
-# ============================================
-# Stage 1: Install dependencies
-# ============================================
+# Install dependencies
 FROM node:20-alpine AS deps
 WORKDIR /app
 
@@ -9,9 +7,7 @@ RUN apk add --no-cache libc6-compat
 COPY package.json package-lock.json ./
 RUN npm ci --legacy-peer-deps
 
-# ============================================
 # Stage 2: Build the application
-# ============================================
 FROM node:20-alpine AS builder
 WORKDIR /app
 
@@ -24,9 +20,7 @@ ENV NEXT_PUBLIC_SOCKET_URL=$NEXT_PUBLIC_SOCKET_URL
 
 RUN npm run build
 
-# ============================================
-# Stage 3: Production runner
-# ============================================
+# Production runner
 FROM node:20-alpine AS runner
 WORKDIR /app
 
