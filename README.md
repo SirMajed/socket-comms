@@ -1,92 +1,46 @@
-# Socket Chat — Client + Server Architecture
+# CPIT-630 — Socket Communication App
 
-Two Docker containers for real-time WebSocket chat between 2 PCs.
+Real-time chat between 2 PCs using WebSockets (Socket.io).
 
-```
-┌─────────────────┐         ┌─────────────────┐
-│  socket-client  │◄──────►│  socket-server  │
-│  (Next.js UI)   │  WS     │  (Socket.io)    │
-│  Port 3000      │         │  Port 4000      │
-└─────────────────┘         └─────────────────┘
-```
+## Prerequisites
 
-## 📁 Structure
+- [Node.js](https://nodejs.org/) (v18 or higher)
 
-```
-socket/
-├── server/              ← Docker #1: Socket Server
-│   ├── server.js        ← The whole server (one file)
-│   ├── package.json
-│   └── Dockerfile
-├── src/                 ← Docker #2: Client UI
-│   └── components/
-│       └── ChatRoom.tsx
-├── Dockerfile
-└── docker-compose.yml
-```
+## How to Run
 
-## 🚀 Quick Start (Local Dev)
+### 1. Start the Server
 
-**Terminal 1 — Start the socket server:**
 ```bash
 cd server
 npm install
-node server.js
-# Server running on port 4000
+node server.js or npm start
 ```
 
-**Terminal 2 — Start the client:**
+Server will start on **http://localhost:4000**
+
+### 2. Start the Client
+
+Open a **new terminal** in the project root:
+
 ```bash
 npm install
 npm run dev
-# Client running on port 3000
 ```
 
-Open `http://localhost:3000` in two browsers and chat!
+Client will start on **http://localhost:3000**
+
+### 3. Chat
+
+1. Open **http://localhost:3000** on PC 1 (or Browser tab 1)
+2. Open **http://localhost:3000** on PC 2 (or Browser tab 2)
+3. Enter a username on each and click **Connect to Chat**
+4. Start messaging!
+
+> **Note:** If running on two different PCs, replace `localhost` with the IP address of the PC running the server.
 
 ---
 
-## 🐳 Docker Build (for Unraid)
-
-### Build both images:
-```bash
-# Build the socket server image
-docker build -t socket-server:latest ./server
-
-# Build the client image (set YOUR_UNRAID_IP)
-docker build -t socket-client:latest \
-  --build-arg NEXT_PUBLIC_SOCKET_URL=http://YOUR_UNRAID_IP:4000 .
-```
-
-### Export as .tar for Unraid:
-```bash
-docker save -o socket-server.tar socket-server:latest
-docker save -o socket-client.tar socket-client:latest
-```
-
-### Or use docker-compose:
-Edit `docker-compose.yml` and change `NEXT_PUBLIC_SOCKET_URL` to your Unraid IP, then:
-```bash
-docker-compose up -d
-```
+Made by **Majed A. Alhasin, 2601443**
 
 ---
-
-## ⚙️ Unraid Setup
-
-1. Copy both `.tar` files to your Unraid
-2. Load them:
-   ```bash
-   docker load -i socket-server.tar
-   docker load -i socket-client.tar
-   ```
-3. Create two Docker containers in Unraid:
-   - **socket-server**: Port `4000:4000`
-   - **socket-client**: Port `3000:3000`, build with `NEXT_PUBLIC_SOCKET_URL=http://YOUR_UNRAID_IP:4000`
-
-## 📝 How It Works
-
-1. **socket-server** runs Socket.io on port 4000 (plain Node.js, one file)
-2. **socket-client** is the Next.js UI on port 3000
-3. When a user opens the client, it connects to the socket server via WebSocket
-4. Messages are broadcast to all connected clients in real-time
+Professor: **Adil Khadidos**

@@ -9,7 +9,7 @@ RUN npm install --production
 COPY server.js ./
 
 # Expose the socket port
-EXPOSE 8080
+EXPOSE 4000
 
 # Start the server
 CMD ["node", "server.js"]

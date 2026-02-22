@@ -24,7 +24,7 @@ export default function ChatRoom() {
         let socketInstance;
 
         try {
-            const serverUrl = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:8080";
+            const serverUrl = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:4000";
             socketInstance = io(serverUrl, {
                 reconnection: true,
                 reconnectionAttempts: 2,
@@ -164,7 +164,7 @@ export default function ChatRoom() {
         );
     }
 
-    // ─── Chat Screen ──────────────────────────────────────
+    // Chat Screen
 
     return (
         <div className="h-screen bg-[#0a0f1a] flex flex-col p-3 md:p-5">

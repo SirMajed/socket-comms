@@ -15,7 +15,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Set the socket server URL at build time
-ARG NEXT_PUBLIC_SOCKET_URL=http://localhost:8080
+ARG NEXT_PUBLIC_SOCKET_URL=http://localhost:4000
 ENV NEXT_PUBLIC_SOCKET_URL=$NEXT_PUBLIC_SOCKET_URL
 
 RUN npm run build

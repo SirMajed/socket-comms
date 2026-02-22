@@ -4,25 +4,23 @@
  * ============================================================
  *
  *  Server Component:
- *  - Listens on port 8080 and accepts connections from multiple clients.
- *  - Handles incoming messages from clients and broadcasts (relays)
+ *  - Listens on port 4000 and accepts connections from multiple clients.
+ *  - Handles incoming messages from clients and broadcasts
  *    them to all other connected clients in real-time.
  *  - Uses TCP (via Socket.io over HTTP) for reliable, ordered delivery.
- *  - Socket.io internally handles concurrent clients using an
- *    event-driven, non-blocking I/O model (similar to multi-threading).
- *  - Includes robust error handling for connection failures,
+ *  - Includes error handling for connection failures,
  *    invalid inputs, and network interruptions.
  *
- *  Author: Majed A. Alhasin
+ *  Author: Majed A. Alhasin, 2601443
  * ============================================================
  */
 
 const http = require("http");
 const { Server } = require("socket.io");
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 4000;
 
-// ─── HTTP Server ────────────────────────────────────────────
+// HTTP Server
 // A simple HTTP server that also serves as the transport layer
 // for our WebSocket (Socket.io) connections (TCP-based).
 
@@ -42,7 +40,7 @@ const httpServer = http.createServer((req, res) => {
     }
 });
 
-// ─── Socket.io Server ──────────────────────────────────────
+// Socket.io Server
 // Creates a WebSocket server on top of the HTTP server.
 // Socket.io uses TCP underneath for reliable, ordered data delivery.
 // CORS is set to allow connections from any client origin.
@@ -54,10 +52,10 @@ const io = new Server(httpServer, {
     },
 });
 
-// ─── Connection Tracking ───────────────────────────────────
+// Connection Tracking
 let connectedUsers = 0;
 
-// ─── Handle Client Connections ─────────────────────────────
+// Handle Client Connections
 // Each client connection creates a new socket instance.
 // Socket.io handles multiple concurrent clients automatically
 // using Node.js event-driven architecture (non-blocking I/O).
@@ -68,7 +66,7 @@ io.on("connection", (socket) => {
         console.log(`[+] Client connected (id: ${socket.id}). Total: ${connectedUsers}`);
         io.emit("user-count", connectedUsers);
 
-        // ─── Receive & Broadcast Messages ────────────────────
+        // Receive & Broadcast Messages
         // When a client sends a message, the server broadcasts it
         // to ALL connected clients (relay / chat functionality).
         socket.on("send-message", (data) => {
@@ -92,7 +90,7 @@ io.on("connection", (socket) => {
             }
         });
 
-        // ─── Handle Client Disconnect ────────────────────────
+        // Handle Client Disconnect
         socket.on("disconnect", (reason) => {
             try {
                 connectedUsers--;
@@ -103,7 +101,7 @@ io.on("connection", (socket) => {
             }
         });
 
-        // ─── Handle Socket Errors ────────────────────────────
+        // Handle Socket Errors
         socket.on("error", (err) => {
             console.error(`[ERROR] Socket error (id: ${socket.id}):`, err.message);
         });
@@ -113,13 +111,13 @@ io.on("connection", (socket) => {
     }
 });
 
-// ─── Start Server ──────────────────────────────────────────
+// Start Server
 try {
     httpServer.listen(PORT, "0.0.0.0", () => {
         console.log("╔══════════════════════════════════════════╗");
         console.log("║   CPIT-630 — Socket Communication Server ║");
-        console.log(`║   Listening on port ${PORT}                  ║`);
-        console.log("║   Waiting for client connections...       ║");
+        console.log(`║   Listening on port ${PORT}              ║`);
+        console.log("║   Waiting for client connections...      ║");
         console.log("╚══════════════════════════════════════════╝");
     });
 } catch (err) {
@@ -127,7 +125,7 @@ try {
     process.exit(1);
 }
 
-// ─── Global Error Handlers ─────────────────────────────────
+// Global Error Handlers
 // Prevents the server from crashing on unexpected errors.
 
 process.on("uncaughtException", (err) => {
